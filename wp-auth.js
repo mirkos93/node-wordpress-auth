@@ -45,9 +45,11 @@ function WP_Auth(wpurl, logged_in_key, logged_in_salt,
 
 WP_Auth.prototype.checkAuth = function(req) {
     var self = this,
-        data = null;
+        data = null,
+	allCookieNames;
     if (req.headers.cookie)
         req.headers.cookie.split(';').forEach(function(cookie) {
+	    allCookieNames.push(cookie.split('=')[0].trim());
             if (cookie.split('=')[0].trim() == self.cookiename)
                 data = cookie.split('=')[1].trim().split('%7C');
         });
@@ -55,7 +57,7 @@ WP_Auth.prototype.checkAuth = function(req) {
         return new Invalid_Auth("no cookie");
 
     if (!data)
-        return new Invalid_Auth("no data in cookie");
+        return new Invalid_Auth("no data in cookie " + self.cookiename + " " + allCookieNames.join(';'));
 
     if (parseInt(data[1]) < new Date / 1000)
         return new Invalid_Auth("expired cookie");
