@@ -57,7 +57,7 @@ WP_Auth.prototype.checkAuth = function(req) {
         return new Invalid_Auth("no cookie");
 
     if (!data)
-        return new Invalid_Auth("no data in cookie " + self.cookiename + " " + allCookieNames.join(';'));
+        return new Invalid_Auth("no data in cookie " + self.cookiename);
 
     if (parseInt(data[1]) < new Date / 1000)
         return new Invalid_Auth("expired cookie");
