@@ -46,7 +46,7 @@ function WP_Auth(wpurl, logged_in_key, logged_in_salt,
 WP_Auth.prototype.checkAuth = function(req) {
     var self = this,
         data = null,
-	allCookieNames;
+	allCookieNames = [];
     if (req.headers.cookie)
         req.headers.cookie.split(';').forEach(function(cookie) {
 	    allCookieNames.push(cookie.split('=')[0].trim());
@@ -55,6 +55,9 @@ WP_Auth.prototype.checkAuth = function(req) {
         });
     else
         return new Invalid_Auth("no cookie");
+	
+    console.log('allCookieNames', allCookieNames);
+    console.log('data', data);
 
     if (!data)
         return new Invalid_Auth("no data in cookie " + self.cookiename);
