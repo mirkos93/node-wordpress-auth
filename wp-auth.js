@@ -58,6 +58,7 @@ WP_Auth.prototype.checkAuth = function(req) {
 	
     console.log('allCookieNames', allCookieNames);
     console.log('data', data);
+    console.log('cookieName', self.cookiename);
 
     if (!data)
         return new Invalid_Auth("no data in cookie " + self.cookiename);
