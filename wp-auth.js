@@ -131,6 +131,7 @@ function Valid_Auth(data, auth) {
     var found = false;
 
     auth.db.getConnection(function(err, connection){
+	    if ( err ) { console.log('auth.db.getConnection err'); return; }
         connection.query({
             sql : 'select ID, user_pass from ' + auth.table_prefix + 'users where user_login = \'' + user_login.replace(/(\'|\\)/g, '\\$1') + '\'',
             timeout : 1000
