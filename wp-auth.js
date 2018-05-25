@@ -138,6 +138,7 @@ function Valid_Auth(data, auth) {
         }, function(err, rows, fields){
 		if ( err ){ console.log('auth.db.query error', err); connection.release(); return; }  
 		
+	    connection.end();
             console.log('rows', rows);
             var data = typeof rows[0] == 'undefined' ? false : rows[0];
 
@@ -157,7 +158,7 @@ function Valid_Auth(data, auth) {
 
             parse(auth.known_hashes[user_login].frag, auth.known_hashes[user_login].id);
 
-            connection.end();
+            
         });
     });
 
