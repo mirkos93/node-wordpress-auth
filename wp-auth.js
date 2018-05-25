@@ -157,7 +157,7 @@ function Valid_Auth(data, auth) {
 
             parse(auth.known_hashes[user_login].frag, auth.known_hashes[user_login].id);
 
-            connection.release();
+            connection.end();
         });
     });
 
