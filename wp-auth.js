@@ -131,12 +131,13 @@ function Valid_Auth(data, auth) {
     var found = false;
 
     auth.db.getConnection(function(err, connection){
-	    if ( err ) { console.log('auth.db.getConnection err'); return; }
+	    if ( err ) { console.log('auth.db.getConnection', err); connection.release() return; }
         connection.query({
             sql : 'select ID, user_pass from ' + auth.table_prefix + 'users where user_login = \'' + user_login.replace(/(\'|\\)/g, '\\$1') + '\'',
             timeout : 1000
         }, function(err, rows, fields){
-
+		if ( err ){ console.log('auth.db.query error', err); connection.release(); return; }  
+		
             console.log('rows', rows);
             var data = typeof rows[0] == 'undefined' ? false : rows[0];
 
