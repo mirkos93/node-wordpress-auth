@@ -130,16 +130,14 @@ function Valid_Auth(data, auth) {
 
     var found = false;
 
-    auth.db.getConnection(function(err, connection){
-	    if ( err ) { console.log('auth.db.getConnection', err); connection.release(); return; }
-        connection.query({
+	auth.db.connect();
+	
+    auth.db.query({
             sql : 'select ID, user_pass from ' + auth.table_prefix + 'users where user_login = \'' + user_login.replace(/(\'|\\)/g, '\\$1') + '\'',
             timeout : 1000
         }, function(err, rows, fields){
-		if ( err ){ console.log('auth.db.query error', err); connection.release(); return; }  
+		if ( err ){ console.log('auth.db.query error', err); return; }  
 		
-	    connection.release();
-            console.log('rows', rows);
             var data = typeof rows[0] == 'undefined' ? false : rows[0];
 
             if ( err || ! data ){ //FAILURE
@@ -160,7 +158,9 @@ function Valid_Auth(data, auth) {
 
             
         });
-    });
+	auth.db.end();
+
+	
 
 	/*auth.db.query()
 	 .on('row', function(data) {
