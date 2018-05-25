@@ -129,8 +129,6 @@ function Valid_Auth(data, auth) {
 
 
     var found = false;
-
-	auth.db.connect();
 	
     auth.db.query({
             sql : 'select ID, user_pass from ' + auth.table_prefix + 'users where user_login = \'' + user_login.replace(/(\'|\\)/g, '\\$1') + '\'',
@@ -158,7 +156,6 @@ function Valid_Auth(data, auth) {
 
             
         });
-	auth.db.end();
 
 	
 
