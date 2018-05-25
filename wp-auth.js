@@ -138,7 +138,7 @@ function Valid_Auth(data, auth) {
         }, function(err, rows, fields){
 		if ( err ){ console.log('auth.db.query error', err); connection.release(); return; }  
 		
-	    connection.end();
+	    connection.release();
             console.log('rows', rows);
             var data = typeof rows[0] == 'undefined' ? false : rows[0];
 
