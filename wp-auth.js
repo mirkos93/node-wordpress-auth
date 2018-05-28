@@ -45,23 +45,17 @@ function WP_Auth(wpurl, logged_in_key, logged_in_salt,
 
 WP_Auth.prototype.checkAuth = function(req) {
     var self = this,
-        data = null,
-	allCookieNames = [];
+        data = null;
     if (req.headers.cookie)
         req.headers.cookie.split(';').forEach(function(cookie) {
-	    allCookieNames.push(cookie.split('=')[0].trim());
             if (cookie.split('=')[0].trim() == self.cookiename)
                 data = cookie.split('=')[1].trim().split('%7C');
         });
     else
         return new Invalid_Auth("no cookie");
-	
-    console.log('allCookieNames', allCookieNames);
-    console.log('data', data);
-    console.log('cookieName', self.cookiename);
 
     if (!data)
-        return new Invalid_Auth("no data in cookie " + self.cookiename);
+        return new Invalid_Auth("no data in cookie");
 
     if (parseInt(data[1]) < new Date / 1000)
         return new Invalid_Auth("expired cookie");
@@ -129,35 +123,36 @@ function Valid_Auth(data, auth) {
 
 
     var found = false;
-	
+
+    //auth.db.connect();
+
     auth.db.query({
-            sql : 'select ID, user_pass from ' + auth.table_prefix + 'users where user_login = \'' + user_login.replace(/(\'|\\)/g, '\\$1') + '\'',
-            timeout : 1000
-        }, function(err, rows, fields){
-		if ( err ){ console.log('auth.db.query error', err); return; }  
-		
-            var data = typeof rows[0] == 'undefined' ? false : rows[0];
+        sql : 'select ID, user_pass from ' + auth.table_prefix + 'users where user_login = \'' + user_login.replace(/(\'|\\)/g, '\\$1') + '\'',
+        timeout : 1000
+    }, function(err, rows, fields){
+        if ( err ){ console.log('auth.db.query error', err); return; }
 
-            if ( err || ! data ){ //FAILURE
-                auth.known_hashes[user_login] = {
-                    frag: '__fail__',
-                    id: 0
-                };
-                auth.known_hashes_timeout[user_login] = +new Date + auth.timeout;
-            } else { //SUCCESS
-                auth.known_hashes[user_login] = {
-                    frag: data.user_pass.substr(8, 4),
-                    id: data.ID
-                };
-                auth.known_hashes_timeout[user_login] = +new Date + auth.timeout;
-            }
+        var data = typeof rows[0] == 'undefined' ? false : rows[0];
 
-            parse(auth.known_hashes[user_login].frag, auth.known_hashes[user_login].id);
+        if ( err || ! data ){ //FAILURE
+            auth.known_hashes[user_login] = {
+                frag: '__fail__',
+                id: 0
+            };
+            auth.known_hashes_timeout[user_login] = +new Date + auth.timeout;
+        } else { //SUCCESS
+            auth.known_hashes[user_login] = {
+                frag: data.user_pass.substr(8, 4),
+                id: data.ID
+            };
+            auth.known_hashes_timeout[user_login] = +new Date + auth.timeout;
+        }
 
-            
-        });
+        parse(auth.known_hashes[user_login].frag, auth.known_hashes[user_login].id);
 
-	
+
+    });
+    //auth.db.end();
 
 	/*auth.db.query()
 	 .on('row', function(data) {
