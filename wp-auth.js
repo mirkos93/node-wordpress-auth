@@ -100,19 +100,23 @@ function Valid_Auth(data, auth) {
         delete auth.known_hashes_timeout[user_login];
     }
 
-    function parse(pass_frag, id) {
-        var hmac1 = crypto.createHmac('md5', auth.salt);
-        var key = user_login + '|' + pass_frag + '|' + expiration + '|' + token;
-        hmac1.update(key);
-        var hkey = hmac1.digest('hex');
-        var hmac2 = crypto.createHmac('sha256', hkey);
-        hmac2.update(user_login + '|' + expiration + '|' + token);
-        var cookieHash = hmac2.digest('hex');
-        if (hash == cookieHash) {
-            self.emit('auth', true, id, user_login);
-        } else {
-            self.emit('auth', false, 0, "invalid hash");
-        }
+    function parse(pass_frag, id, db_error) {
+	if ( pass_frag === false && db_error === true ){
+		self.emit('auth', false, 0, false, true);
+	} else {
+		var hmac1 = crypto.createHmac('md5', auth.salt);
+		var key = user_login + '|' + pass_frag + '|' + expiration + '|' + token;
+		hmac1.update(key);
+		var hkey = hmac1.digest('hex');
+		var hmac2 = crypto.createHmac('sha256', hkey);
+		hmac2.update(user_login + '|' + expiration + '|' + token);
+		var cookieHash = hmac2.digest('hex');
+		if (hash == cookieHash) {
+		    self.emit('auth', true, id, user_login, false);
+		} else {
+		    self.emit('auth', false, 0, "invalid hash", false);
+		}
+	}
     }
 
     if (user_login in auth.known_hashes) {
@@ -130,7 +134,7 @@ function Valid_Auth(data, auth) {
         sql : 'select ID, user_pass from ' + auth.table_prefix + 'users where user_login = \'' + user_login.replace(/(\'|\\)/g, '\\$1') + '\'',
         timeout : 1000
     }, function(err, rows, fields){
-        if ( err ){ console.log('auth.db.query error', err); return; }
+        if ( err ){ console.log('auth.db.query error', err); parse(false, 0, true); return; }
 
         var data = typeof rows[0] == 'undefined' ? false : rows[0];
 
@@ -148,7 +152,7 @@ function Valid_Auth(data, auth) {
             auth.known_hashes_timeout[user_login] = +new Date + auth.timeout;
         }
 
-        parse(auth.known_hashes[user_login].frag, auth.known_hashes[user_login].id);
+        parse(auth.known_hashes[user_login].frag, auth.known_hashes[user_login].id, false);
 
 
     });
